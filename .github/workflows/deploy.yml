@@ -1,0 +1,61 @@
+# Nome do seu workflow
+name: Deploy Vite site to Pages
+
+# Gatilho: Executa toda vez que você faz um 'git push' para a branch 'main'
+on:
+  push:
+    branches: ["main"]
+
+# Permite que o workflow escreva no seu repositório para fazer o deploy
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Define o que o workflow vai fazer
+jobs:
+  # O nome do "trabalho" é build
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Baixa o código da sua branch 'main'
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Configura o ambiente Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # Use a versão do Node que preferir
+          cache: "npm"
+
+      # 3. Instala todas as dependências do seu package.json (incluindo o 'gray-matter'!)
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Executa o script de 'build' para gerar os arquivos finais do site
+      - name: Build
+        run: npm run build
+
+      # 5. Prepara os arquivos da pasta 'dist' para serem publicados
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 6. Faz o upload dos arquivos construídos
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+  # O nome do "trabalho" é deploy
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # 7. Publica o site no GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
