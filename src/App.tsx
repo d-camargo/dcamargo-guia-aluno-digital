@@ -6,8 +6,9 @@ import BlogPost from './pages/BlogPost';
 import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
   return (
-    <Router basename="/dcamargo-guia-aluno-digital">
+    <Router basename={basename}>
       <div className="min-h-screen bg-gray-50">
         <Header />
         <main>
